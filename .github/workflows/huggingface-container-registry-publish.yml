@@ -59,6 +59,23 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry and version plugin
+        run: ./test/scripts/gh-actions/setup-poetry.sh
+
+      - name: Extract version from VERSION file
+        id: version
+        run: |
+          VERSION=$(cat python/VERSION | tr -d '\n')
+          DATE=$(date +%Y%m%d)
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "date=${DATE}" >> $GITHUB_OUTPUT
+          echo "version_date=${VERSION}-${DATE}" >> $GITHUB_OUTPUT
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -74,6 +91,7 @@ jobs:
           tags: |
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
             type=sha,format=short
+            type=raw,value=${{ steps.version.outputs.version_date }},enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -109,6 +127,23 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry and version plugin
+        run: ./test/scripts/gh-actions/setup-poetry.sh
+
+      - name: Extract version from VERSION file
+        id: version
+        run: |
+          VERSION=$(cat python/VERSION | tr -d '\n')
+          DATE=$(date +%Y%m%d)
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "date=${DATE}" >> $GITHUB_OUTPUT
+          echo "version_date=${VERSION}-${DATE}" >> $GITHUB_OUTPUT
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -124,6 +159,7 @@ jobs:
           tags: |
             type=raw,value=latest-cpu,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
             type=sha,format=short,suffix=-cpu
+            type=raw,value=${{ steps.version.outputs.version_date }}-cpu,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
 
       - name: Build and push
         uses: docker/build-push-action@v5
